@@ -20,7 +20,9 @@ class AutorSerializer(serializers.ModelSerializer):
  
 class LivroSerializer(serializers.ModelSerializer): 
     _links = serializers.SerializerMethodField() 
-    autor = AutorSerializer(read_only=True) 
+    autor = serializers.PrimaryKeyRelatedField(
+        queryset=Autor.objects.all()
+    )
     class Meta: 
         model = Livro 
         fields = ['id', 'titulo', 'ano_publicacao', 'autor', '_links'] 
