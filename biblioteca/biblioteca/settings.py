@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-j=(e&uu^o6lp7%qeii%f#l-tp=yf#*ska#y9tr6kx_0ubw3!%v
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -41,7 +41,29 @@ INSTALLED_APPS = [
 'livros',                  
 'rest_framework_simplejwt',
 'drf_yasg', 
+'corsheaders'
 ] 
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization. Use o formato: Bearer <seu_token>'
+        }
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
