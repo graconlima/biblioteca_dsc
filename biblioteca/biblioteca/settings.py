@@ -25,15 +25,8 @@ SECRET_KEY = 'django-insecure-j=(e&uu^o6lp7%qeii%f#l-tp=yf#*ska#y9tr6kx_0ubw3!%v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://localhost'
-]
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
-SECURE_SSL_REDIRECT = True
+ALLOWED_HOSTS = ['*']
+SECURE_SSL_REDIRECT = False
 
 # Application definition
 
@@ -52,9 +45,8 @@ INSTALLED_APPS = [
 ] 
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
