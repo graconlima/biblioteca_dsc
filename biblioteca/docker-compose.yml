@@ -4,8 +4,20 @@ services:
     build: .
     container_name: django
     restart: always
+
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      gunicorn biblioteca.wsgi:application --bind 0.0.0.0:8000
+      "
+
     ports:
       - "8000:8000"
+
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
 
   nginx:
     image: nginx:latest
@@ -17,6 +29,7 @@ services:
 
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/staticfiles
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
 
