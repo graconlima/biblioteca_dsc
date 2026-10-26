@@ -1,0 +1,70 @@
+# This workflow will build and push a Docker container to an Azure Web App when a commit is pushed to your default branch.
+name: Build and deploy a container to an Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: app-dsc       # Substitua pelo nome do seu Azure Web App
+  DOCKERHUB_REPO: graconlima/app-dsc   # Substitua pelo seu usuário e nome do repositório no Docker Hub
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 1. Faz o login no Docker Hub utilizando as credenciais dos Secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 2. Constrói a imagem e envia para o Docker Hub com a tag do commit e a tag latest
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_REPO }}:${{ github.sha }}
+            ${{ env.DOCKERHUB_REPO }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      # 1. Autentica na Azure usando o segredo de Service Principal
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 2. Executa o deploy no Azure Web App apontando para a nova imagem do Docker Hub
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: '${{ env.DOCKERHUB_REPO }}:${{ github.sha }}'
+
+      # 3. Faz o logout da sessão da Azure por segurança
+      - name: Log out from Azure
+        run: |
+          az logout
